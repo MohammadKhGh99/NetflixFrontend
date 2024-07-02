@@ -25,12 +25,12 @@ pipeline {
 
     stages {
         stage('Docker setup') {
-            script {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASS')]) {
-                    steps {
-                        sh '''
-                          docker login -u $DOCKER_USERNAME -p $DOCKER_PASS
-                        '''
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASS')]) {
+                            sh '''
+                              docker login -u $DOCKER_USERNAME -p $DOCKER_PASS
+                            '''
                     }
                 }
             }
