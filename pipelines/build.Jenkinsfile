@@ -34,6 +34,7 @@ pipeline {
 
             stage('Build & Push') {
                 steps {
+                    cleanWs()
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASS')]) {
                         sh '''
                           IMAGE_FULL_NAME=$DOCKER_USERNAME/$IMAGE_BASE_NAME:$IMAGE_TAG
