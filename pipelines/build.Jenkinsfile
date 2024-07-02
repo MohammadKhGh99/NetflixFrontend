@@ -19,8 +19,8 @@ pipeline {
         IMAGE_TAG = 0.0.${BUILD_NUMBER}
         IMAGE_BASE_NAME = 'netflix-app'
 
-        DOCKER_USERNAME = "credentials('dockerhub').username"
-        DOCKER_PASS = "credentials('dockerhub').password"
+//         DOCKER_USERNAME = credentials('dockerhub').username
+//         DOCKER_PASS = credentials('dockerhub').password
     }
 
     stages {
@@ -34,12 +34,14 @@ pipeline {
 
             stage('Build & Push') {
                 steps {
-                    sh '''
-                      IMAGE_FULL_NAME=$DOCKER_USERNAME/$IMAGE_BASE_NAME:$IMAGE_TAG
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASS')]) {
+                        sh '''
+                          IMAGE_FULL_NAME=$DOCKER_USERNAME/$IMAGE_BASE_NAME:$IMAGE_TAG
 
-                      docker build -t $IMAGE_FULL_NAME .
-                      docker push $IMAGE_FULL_NAME
-                    '''
+                          docker build -t $IMAGE_FULL_NAME .
+                          docker push $IMAGE_FULL_NAME
+                        '''
+                    }
                 }
             }
 //         stage('Build app container') {
