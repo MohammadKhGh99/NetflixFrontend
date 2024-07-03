@@ -1,10 +1,8 @@
-// pipelines/build.Jenkinsfile
-
 pipeline {
     agent any
 
     triggers {
-        githubPush()
+        githubPush()   // trigger the pipeline upon push event in github
     }
 
     options {
@@ -17,51 +15,31 @@ pipeline {
         // TIMESTAMP = new Date().format("yyyyMMdd-HHmmss")
 
         IMAGE_TAG = "v1.0.$BUILD_NUMBER"
-        IMAGE_BASE_NAME = 'netflix-app'
+        IMAGE_BASE_NAME = "netflix-app"
 
-//         DOCKER_USERNAME = credentials('dockerhub').username
-//         DOCKER_PASS = credentials('dockerhub').password
+        DOCKER_CREDS = credentials('dockerhub')
+        DOCKER_USERNAME = ${DOCKER_CREDS_USR}  // The _USR suffix added to access the username value
+        DOCKER_PASS = ${DOCKER_CREDS_PSW}      // The _PSW suffix added to access the password value
     }
 
     stages {
         stage('Docker setup') {
             steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASS')]) {
-                            sh '''
-                              docker login -u $DOCKER_USERNAME -p $DOCKER_PASS
-                            '''
-                    }
-                }
+                sh '''
+                  docker login -u $DOCKER_USERNAME -p $DOCKER_PASS
+                '''
             }
         }
 
         stage('Build & Push') {
             steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASS')]) {
-                        sh '''
-                          IMAGE_FULL_NAME=$DOCKER_USERNAME/$IMAGE_BASE_NAME:$IMAGE_TAG
+                sh '''
+                  IMAGE_FULL_NAME=$DOCKER_USERNAME/$IMAGE_BASE_NAME:$IMAGE_TAG
 
-                          docker build -t $IMAGE_FULL_NAME .
-                          docker push $IMAGE_FULL_NAME
-                        '''
-                    }
-                }
+                  docker build -t $IMAGE_FULL_NAME .
+                  docker push $IMAGE_FULL_NAME
+                '''
             }
         }
-//         stage('Build app container') {
-//             steps {
-//                 sh '''
-//                     # your pipeline commands here....
-//
-//                     # for example list the files in the pipeline workdir
-//                     ls
-//
-//                     # build an image
-//                     docker build -t netflix-front .
-//                 '''
-//             }
-//         }
     }
 }
